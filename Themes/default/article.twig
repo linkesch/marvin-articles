@@ -1,0 +1,32 @@
+{% extends "default/layout.twig" %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="/assets/marvin/pages/bower_components/medium-editor-insert-plugin/dist/css/medium-editor-insert-plugin-frontend.min.css">
+{% endblock %}
+
+{% block content %}
+    <header>
+        <h2><a href="/{{ article.pageSlug }}/article/{{ article.slug }}">{{ article.name }}</a></h2>
+        <span class="text-muted">{{ article.created_at|date('d.m.Y') }}</span>
+    </header>
+    <br>
+
+    {{ article.content|raw }}
+
+    {% if before or after %}
+        <br><hr>
+        <div class="row">
+            <div class="col-sm-6">
+                {% if before %}
+                    <a href="/{{ before.pageSlug }}/article/{{ before.slug }}">&laquo; {{ before.name }}</a>
+                {% endif %}
+            </div>
+            <div class="col-sm-6 text-right">
+                {% if after %}
+                    <a href="/{{ after.pageSlug }}/article/{{ after.slug }}">{{ after.name }} &raquo;</a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

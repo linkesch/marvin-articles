@@ -1,0 +1,41 @@
+{% extends "admin/layout.twig" %}
+
+{% block content %}
+    <header class="page-header">
+        <h1>{{ 'Articles'|trans }}</h1>
+    </header>
+
+    {% for message in app.session.getFlashBag.get('message') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+
+    <p><a href="/admin/articles/form" class="btn btn-primary">New article</a></p>
+    <p>{{ 'Number of articles'|trans }}: {{ articles|length }}</p>
+    <br>
+
+    <table id="articles" class="table table-striped">
+        <thead>
+            <tr>
+                <th>{{ 'Title'|trans }}</th>
+                <th>{{ 'Page'|trans }}</th>
+                <th width="15%"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for article in articles %}
+                <tr>
+                    <td>{{ article.name }}</td>
+                    <td>{{ article.page }}</td>
+                    <td>
+                        <a href="/admin/articles/form/{{ article.id }}" class="btn btn-primary">{{ 'Edit'|trans }}</a>
+                        <a href="/admin/articles/delete/{{ article.id }}" class="btn btn-danger confirm">{{ 'Delete'|trans }}</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4">{{ 'There are no articles.'|trans }} <a href="/admin/articles/form">{{ 'Create the first one now.'|trans }}</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

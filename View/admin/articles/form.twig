@@ -1,0 +1,55 @@
+{% extends "admin/layout.twig" %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/marvin/pages/bower_components/medium-editor/dist/css/medium-editor.min.css">
+  <link rel="stylesheet" href="/assets/marvin/pages/bower_components/medium-editor/dist/css/themes/bootstrap.css">
+  <link rel="stylesheet" href="/assets/marvin/pages/bower_components/medium-editor-insert-plugin/dist/css/medium-editor-insert-plugin.min.css">
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script src="/assets/marvin/pages/bower_components/medium-editor/dist/js/medium-editor.min.js"></script>
+  <script src="/assets/marvin/pages/bower_components/medium-editor-insert-plugin/dist/js/medium-editor-insert-plugin.all.min.js"></script>
+  <script src="/assets/marvin/articles/js/admin/articles.js"></script>
+{% endblock %}
+
+{% block content %}
+    <header class="page-header">
+        {% for message in app.session.getFlashBag.get('message') %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+
+        <h1 class="editable" id="article-name" data-placeholder="{{ 'Type the new article title'|trans }}">
+            {% if form.vars.value %}
+                {{ form.vars.value.name }}
+            {% endif %}
+        </h1>
+    </header>
+
+    <div class="editable" id="article-content">
+        {% if form.vars.value %}
+            {{ form.vars.value.content|raw }}
+        {% endif %}
+    </div>
+
+    <br><br>
+
+    <form action="/admin/articles/form" method="post">
+
+        <div class="row">
+          <div class="col-md-4">
+            {{ form_row(form.page_id) }}
+          </div>
+        </div>
+
+        <br><br>
+
+        <div class="hidden">
+            {{ form_widget(form) }}
+        </div>
+
+        <button type="submit" id="save" class="btn btn-primary">{{ 'Save'|trans }}</button> {{ 'or'|trans }} <a href="/admin/articles">{{ 'go back'|trans }}</a>
+    </form>
+{% endblock %}

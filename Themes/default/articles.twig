@@ -1,0 +1,22 @@
+<section class="articles">
+
+    {% for article in plugin.articles %}
+        <article class="article">
+            <header>
+                <h2><a href="/{{ page.slug }}/article/{{ article.slug }}">{{ article.name }}</a></h2>
+                <span class="text-muted">{{ article.created_at|date('d.m.Y') }}</span>
+            </header>
+            <br>
+
+            {% set intro = article.content|split('</p>') %}
+            {{ intro[0]|raw }}</p>
+
+            <p><a href="/{{ page.slug }}/article/{{ article.slug }}">Read more</a></p>
+        </article>
+        {% if loop.last == false %}
+            <br>
+            <hr>
+            <br>
+        {% endif %}
+    {% endfor %}
+</section>
