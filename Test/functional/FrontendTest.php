@@ -2,7 +2,7 @@
 
 use Marvin\Marvin\Test\FunctionalTestCase;
 
-class frontendTest extends FunctionalTestCase
+class FrontendTest extends FunctionalTestCase
 {
     public function testArticlesList()
     {
@@ -19,7 +19,7 @@ class frontendTest extends FunctionalTestCase
     {
         $client = $this->createClient();
         $this->logIn($client);
-        $crawler = $client->request('GET', '/home/article/hello-world');
+        $client->request('GET', '/home/article/hello-world');
 
         $this->assertTrue($client->getResponse()->isOk());
     }
