@@ -3,7 +3,7 @@
     "description": "Articles plugin for Marvin - PHP micro CMS based on Silex framework",
     "homepage": "http://github.com/orthes/marvin-articles",
     "keywords": ["cms", "micro cms", "simple cms", "silex", "articles", "plugin"],
-    "version": "0.1.1",
+    "version": "0.1.2",
     "license": "MIT",
     "authors": [
         {
