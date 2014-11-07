@@ -51,6 +51,19 @@ class FrontendControllerProvider implements ControllerProviderInterface
             ));
         });
 
+        $controllers->get('/rss', function () use ($app) {
+            $articles = $app['db']->fetchAll(
+                "SELECT a.*, p.slug AS pageSlug
+                FROM article a
+                LEFT JOIN page p ON p.id = a.page_id
+                ORDER BY a.id DESC"
+            );
+
+            return $app['twig']->render('frontend/articles/rss.twig', array(
+                'articles' => $articles,
+            ));
+        });
+
         return $controllers;
     }
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<rss version="2.0">
+<channel>
+    <title>{{ app.config.website.name }}</title>
+    <link>{{ app.config.website.url }}</link>
+    <description>{{ app.config.website.description }}</description>
+    {% for article in articles %}
+    <item>
+        <title>{{ article.name }}</title>
+        <link>{{ app.config.website.url }}/{{ article.pageSlug }}/article/{{ article.slug }}</link>
+        <description>{{ article.content }}</description>
+    </item>
+    {% endfor %}
+</channel>
+</rss>
