@@ -1,14 +1,17 @@
 <?xml version="1.0" ?>
-<rss version="2.0">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
+    <atom:link href="{{ app.config.website.url }}/rss" rel="self" type="application/rss+xml" />
     <title>{{ app.config.website.name }}</title>
     <link>{{ app.config.website.url }}</link>
     <description>{{ app.config.website.description }}</description>
     {% for article in articles %}
     <item>
+        <guid>{{ app.config.website.url }}/{{ article.pageSlug }}/article/{{ article.slug }}</guid>
         <title>{{ article.name }}</title>
         <link>{{ app.config.website.url }}/{{ article.pageSlug }}/article/{{ article.slug }}</link>
-        <description>{{ article.content }}</description>
+        <pubDate>{{ article.created_at|date("r") }}</pubDate>
+        <description>{{ article.content|paths }}</description>
     </item>
     {% endfor %}
 </channel>
