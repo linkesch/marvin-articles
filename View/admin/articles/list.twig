@@ -9,7 +9,7 @@
         <div class="alert alert-success">{{ message }}</div>
     {% endfor %}
 
-    <p><a href="/admin/articles/form" class="btn btn-primary">New article</a></p>
+    <p><a href="/admin/articles/form" class="btn btn-primary">{{ 'New article'|trans }}</a></p>
     <p>{{ 'Number of articles'|trans }}: {{ articles|length }}</p>
     <br>
 
