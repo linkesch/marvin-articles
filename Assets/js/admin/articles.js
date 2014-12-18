@@ -3,12 +3,15 @@ var marvin_articles = function () {
 
     return {
         init: function () {
+            marvin_pages.$table = $('#articles');
+
             marvin_articles.events();
             marvin_articles.editor();
         },
 
         events: function () {
             $(document).on('input', '#article-name, #article-content', marvin_articles.editorInput);
+            $(document).on('click', '#articles .move-up, #articles .move-down', marvin_pages.move);
         },
 
         editor: function () {

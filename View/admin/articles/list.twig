@@ -18,6 +18,7 @@
             <tr>
                 <th>{{ 'Title'|trans }}</th>
                 <th>{{ 'Page'|trans }}</th>
+                <th width="20%" colspan="2">{{ 'Order'|trans }}</th>
                 <th width="15%"></th>
             </tr>
         </thead>
@@ -27,13 +28,25 @@
                     <td>{{ article.name }}</td>
                     <td>{{ article.page }}</td>
                     <td>
+                        <a href="/admin/articles/move/{{ article.id }}/up" class="btn btn-default move-up move{% if loop.first %} hidden{% endif %}">
+                            <span class="glyphicon glyphicon-arrow-up"></span>
+                            {{ 'Move up'|trans }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/admin/articles/move/{{ article.id }}/down" class="btn btn-default move-down move{% if loop.last %} hidden{% endif %}">
+                            <span class="glyphicon glyphicon-arrow-down"></span>
+                            {{ 'Move down'|trans }}
+                        </a>
+                    </td>
+                    <td>
                         <a href="/admin/articles/form/{{ article.id }}" class="btn btn-primary">{{ 'Edit'|trans }}</a>
                         <a href="/admin/articles/delete/{{ article.id }}" class="btn btn-danger confirm">{{ 'Delete'|trans }}</a>
                     </td>
                 </tr>
             {% else %}
                 <tr>
-                    <td colspan="4">{{ 'There are no articles.'|trans }} <a href="/admin/articles/form">{{ 'Create the first one now.'|trans }}</a></td>
+                    <td colspan="5">{{ 'There are no articles.'|trans }} <a href="/admin/articles/form">{{ 'Create the first one now.'|trans }}</a></td>
                 </tr>
             {% endfor %}
         </tbody>

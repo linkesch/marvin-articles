@@ -63,11 +63,12 @@ class AdminTest extends FunctionalTestCase
 
     public function testEditArticle()
     {
-        $this->app['db']->executeUpdate("INSERT INTO article (page_id, name, slug, content, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)", array(
+        $this->app['db']->executeUpdate("INSERT INTO article (page_id, name, slug, content, sort, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)", array(
             1,
             "Test article",
             "test-article",
             "",
+            2,
             date('Y-m-d H:i:s'),
             date('Y-m-d H:i:s'),
         ));
@@ -109,6 +110,33 @@ class AdminTest extends FunctionalTestCase
 
         $crawler = $client->request('GET', '/admin/articles');
         $this->assertCount(1, $crawler->filter('#articles tbody tr'));
+    }
+
+    public function testMovePage()
+    {
+        $this->app['db']->executeUpdate("INSERT INTO article (page_id, name, slug, content, sort, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)", array(
+            1,
+            "Test article",
+            "test-article",
+            "",
+            2,
+            date('Y-m-d H:i:s'),
+            date('Y-m-d H:i:s'),
+        ));
+
+        $client = $this->createClient();
+        $this->logIn($client);
+        $crawler = $client->request('POST', '/admin/articles/move/2/down');
+
+        $this->assertTrue($client->getResponse()->isOk());
+        $this->assertEquals('Hello World!', $crawler->filter('table#articles tbody tr:first-child td:first-child')->text());
+        $this->assertEquals('Test article', $crawler->filter('table#articles tbody tr:last-child td:first-child')->text());
+
+        $crawler = $client->request('POST', '/admin/articles/move/2/up');
+
+        $this->assertTrue($client->getResponse()->isOk());
+        $this->assertEquals('Test article', $crawler->filter('table#articles tbody tr:first-child td:first-child')->text());
+        $this->assertEquals('Hello World!', $crawler->filter('table#articles tbody tr:last-child td:first-child')->text());
     }
 
 }

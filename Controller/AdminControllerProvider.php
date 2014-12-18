@@ -13,7 +13,7 @@ class AdminControllerProvider implements ControllerProviderInterface
         $controllers = $app['controllers_factory'];
 
         $controllers->get('/', function () use ($app) {
-            $articles = $app['db']->fetchAll("SELECT a.*, p.name AS page FROM article a LEFT JOIN page p ON p.id = a.page_id ORDER BY a.id DESC");
+            $articles = $app['db']->fetchAll("SELECT a.*, p.name AS page FROM article a LEFT JOIN page p ON p.id = a.page_id ORDER BY sort DESC");
 
             return $app['twig']->render('admin/articles/list.twig', array(
                 'articles' => $articles,
@@ -64,11 +64,13 @@ class AdminControllerProvider implements ControllerProviderInterface
                 } while ($find['count'] > 0);
 
                 if ($data['id'] == 0) {
-                    $app['db']->executeUpdate("INSERT INTO article (page_id, name, slug, content, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)", array(
+                    $maxSort = $app['db']->fetchAssoc("SELECT MAX(sort) AS sort FROM article");
+                    $app['db']->executeUpdate("INSERT INTO article (page_id, name, slug, content, sort, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)", array(
                         $data['page_id'],
                         $data['name'],
                         $slug,
                         $data['content'],
+                        $maxSort['sort']+1,
                         date('Y-m-d H:i:s'),
                         date('Y-m-d H:i:s'),
                     ));
@@ -100,6 +102,9 @@ class AdminControllerProvider implements ControllerProviderInterface
         ->assert('id', '\d+');
 
         $controllers->get('/delete/{id}', function ($id) use ($app) {
+            $article = $app['db']->fetchAssoc("SELECT sort FROM article WHERE id = ?", array($id));
+            $app['db']->executeUpdate("UPDATE article SET sort=sort-1 WHERE sort > ?", array($article['sort']));
+
             $app['db']->delete('article', array('id' => $id));
 
             $app['session']->getFlashBag()->add('message', $app['translator']->trans('The article was deleted'));
@@ -107,6 +112,20 @@ class AdminControllerProvider implements ControllerProviderInterface
             return $app->redirect('/admin/articles');
         })
         ->assert('id', '\d+');
+
+        $controllers->match('/move/{id}/{type}', function ($id, $type) use ($app) {
+            $action = $type == 'down' ? -1 : 1;
+
+            $article = $app['db']->fetchAssoc("SELECT sort FROM article WHERE id = ?", array($id));
+            $app['db']->executeUpdate("UPDATE article SET sort=sort+? WHERE sort = ?", array(-$action, $article['sort']+$action));
+            $app['db']->executeUpdate("UPDATE article SET sort=sort+? WHERE id = ?", array($action, $id));
+
+            $app['session']->getFlashBag()->add('message', $app['translator']->trans('Order of articles was changed'));
+
+            return $app->redirect('/admin/articles');
+        })
+        ->assert('id', '\d+')
+        ->assert('type', '(up|down)');
 
         return $controllers;
     }

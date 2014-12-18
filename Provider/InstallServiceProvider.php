@@ -4,6 +4,10 @@ namespace Marvin\Articles\Provider;
 
 use Silex\Application;
 use Silex\ServiceProviderInterface;
+use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\TableDiff;
+use Doctrine\DBAL\Schema\Schema;
 
 class InstallServiceProvider implements ServiceProviderInterface
 {
@@ -14,7 +18,7 @@ class InstallServiceProvider implements ServiceProviderInterface
             $plugins['articles'] = function () use ($app) {
 
                 $sm = $app['db']->getSchemaManager();
-                $schema = new \Doctrine\DBAL\Schema\Schema();
+                $schema = new Schema();
 
                 if ($sm->tablesExist(array('article')) == false) {
                     // Create table article
@@ -24,6 +28,7 @@ class InstallServiceProvider implements ServiceProviderInterface
                     $articleTable->addColumn('name', 'string');
                     $articleTable->addColumn('slug', 'string');
                     $articleTable->addColumn('content', 'text', array('notnull' => false));
+                    $articleTable->addColumn('sort', 'integer', array('notnull' => false));
                     $articleTable->addColumn('created_at', 'datetime');
                     $articleTable->addColumn('updated_at', 'datetime');
                     $articleTable->setPrimaryKey(array("id"));
@@ -37,11 +42,12 @@ class InstallServiceProvider implements ServiceProviderInterface
                     );
 
                     // Create article
-                    $app['db']->executeUpdate("INSERT INTO article (page_id, name, slug, content, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)", array(
+                    $app['db']->executeUpdate("INSERT INTO article (page_id, name, slug, content, sort, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)", array(
                         1,
                         'Hello World!',
                         'hello-world',
                         '<p>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Vestibulum id ligula porta felis euismod semper. Maecenas sed diam eget risus varius blandit sit amet non magna.</p>',
+                        1,
                         date('Y-m-d H:i:s'),
                         date('Y-m-d H:i:s'),
                     ));
@@ -62,11 +68,31 @@ class InstallServiceProvider implements ServiceProviderInterface
                         );
                     }
                 } else {
-                    $messages[] = $app['install_status'](
-                        true,
-                        'Article table already exists.',
-                        null
-                    );
+                    $columns = $sm->listTableColumns('article');
+                    if (empty($columns['sort'])) {
+                        $diff = new TableDiff('article', array(
+                            new Column('sort', Type::getType('integer'), array('notnull' => false)),
+                        ));
+
+                        $sm->alterTable($diff);
+
+                        $app['db']->executeUpdate("UPDATE article SET sort = id");
+
+                        $messages[] = $app['install_status'](
+                            true,
+                            'Sort column added to article table.',
+                            null
+                        );
+
+                    } else {
+
+                        $messages[] = $app['install_status'](
+                            true,
+                            'Article table already exists.',
+                            null
+                        );
+
+                    }
                 }
 
                 return $messages;
