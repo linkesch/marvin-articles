@@ -12,7 +12,7 @@ class FrontendServiceProvider implements ServiceProviderInterface
         $app->extend('pages_plugins', function ($plugins) use ($app) {
 
             $plugins['articles'] = function ($pageId) use ($app) {
-                $articles = $app['db']->fetchAll("SELECT * FROM article WHERE page_id = ? ORDER BY id DESC", array($pageId));
+                $articles = $app['db']->fetchAll("SELECT * FROM article WHERE page_id = ? ORDER BY sort DESC", array($pageId));
 
                 if ($articles) {
                     return array(

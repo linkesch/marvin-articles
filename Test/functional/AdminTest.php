@@ -124,19 +124,60 @@ class AdminTest extends FunctionalTestCase
             date('Y-m-d H:i:s'),
         ));
 
+        $this->app['db']->executeUpdate("INSERT INTO page (name, slug, content, sort, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)", array(
+            "Page",
+            "page",
+            "",
+            2,
+            date('Y-m-d H:i:s'),
+            date('Y-m-d H:i:s'),
+        ));
+
+        $this->app['db']->executeUpdate("INSERT INTO article (page_id, name, slug, content, sort, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)", array(
+            2,
+            "Test article 2",
+            "test-article-2",
+            "",
+            1,
+            date('Y-m-d H:i:s'),
+            date('Y-m-d H:i:s'),
+        ));
+
+        $this->app['db']->executeUpdate("INSERT INTO article (page_id, name, slug, content, sort, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)", array(
+            2,
+            "Test article 3",
+            "test-article-3",
+            "",
+            2,
+            date('Y-m-d H:i:s'),
+            date('Y-m-d H:i:s'),
+        ));
+
         $client = $this->createClient();
         $this->logIn($client);
         $crawler = $client->request('POST', '/admin/articles/move/2/down');
 
         $this->assertTrue($client->getResponse()->isOk());
         $this->assertEquals('Hello World!', $crawler->filter('table#articles tbody tr:first-child td:first-child')->text());
-        $this->assertEquals('Test article', $crawler->filter('table#articles tbody tr:last-child td:first-child')->text());
+        $this->assertEquals('Test article', $crawler->filter('table#articles tbody tr:nth-child(2) td:first-child')->text());
+        $this->assertEquals('Test article 3', $crawler->filter('table#articles tbody tr:nth-child(3) td:first-child')->text());
+        $this->assertEquals('Test article 2', $crawler->filter('table#articles tbody tr:last-child td:first-child')->text());
 
         $crawler = $client->request('POST', '/admin/articles/move/2/up');
 
         $this->assertTrue($client->getResponse()->isOk());
         $this->assertEquals('Test article', $crawler->filter('table#articles tbody tr:first-child td:first-child')->text());
-        $this->assertEquals('Hello World!', $crawler->filter('table#articles tbody tr:last-child td:first-child')->text());
+        $this->assertEquals('Hello World!', $crawler->filter('table#articles tbody tr:nth-child(2) td:first-child')->text());
+        $this->assertEquals('Test article 3', $crawler->filter('table#articles tbody tr:nth-child(3) td:first-child')->text());
+        $this->assertEquals('Test article 2', $crawler->filter('table#articles tbody tr:last-child td:first-child')->text());
+
+        $crawler = $client->request('POST', '/admin/articles/move/4/up');
+
+        $this->assertTrue($client->getResponse()->isOk());
+        $this->assertEquals('Test article', $crawler->filter('table#articles tbody tr:first-child td:first-child')->text());
+        $this->assertEquals('Hello World!', $crawler->filter('table#articles tbody tr:nth-child(2) td:first-child')->text());
+        $this->assertEquals('Test article 3', $crawler->filter('table#articles tbody tr:nth-child(3) td:first-child')->text());
+        $this->assertEquals('Test article 2', $crawler->filter('table#articles tbody tr:last-child td:first-child')->text());
     }
 
 }

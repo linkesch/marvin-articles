@@ -25,7 +25,7 @@ class FrontendControllerProvider implements ControllerProviderInterface
                 FROM article a
                 LEFT JOIN page p ON p.id = a.page_id
                 WHERE a.id < ? AND p.slug = ?
-                ORDER BY id DESC
+                ORDER BY sort DESC
                 LIMIT 0,1"
             , array($article['id'], $pageSlug));
 
@@ -34,7 +34,7 @@ class FrontendControllerProvider implements ControllerProviderInterface
                 FROM article a
                 LEFT JOIN page p ON p.id = a.page_id
                 WHERE a.id > ? AND p.slug = ?
-                ORDER BY id ASC
+                ORDER BY sort ASC
                 LIMIT 0,1"
             , array($article['id'], $pageSlug));
 

@@ -13,7 +13,7 @@ class AdminControllerProvider implements ControllerProviderInterface
         $controllers = $app['controllers_factory'];
 
         $controllers->get('/', function () use ($app) {
-            $articles = $app['db']->fetchAll("SELECT a.*, p.name AS page FROM article a LEFT JOIN page p ON p.id = a.page_id ORDER BY sort DESC");
+            $articles = $app['db']->fetchAll("SELECT a.*, p.name AS page FROM article a LEFT JOIN page p ON p.id = a.page_id ORDER BY p.sort ASC, a.sort DESC");
 
             return $app['twig']->render('admin/articles/list.twig', array(
                 'articles' => $articles,
@@ -64,7 +64,7 @@ class AdminControllerProvider implements ControllerProviderInterface
                 } while ($find['count'] > 0);
 
                 if ($data['id'] == 0) {
-                    $maxSort = $app['db']->fetchAssoc("SELECT MAX(sort) AS sort FROM article");
+                    $maxSort = $app['db']->fetchAssoc("SELECT MAX(sort) AS sort FROM article WHERE page_id = ?", array($data['page_id']));
                     $app['db']->executeUpdate("INSERT INTO article (page_id, name, slug, content, sort, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)", array(
                         $data['page_id'],
                         $data['name'],
@@ -79,6 +79,17 @@ class AdminControllerProvider implements ControllerProviderInterface
 
                     $app['session']->getFlashBag()->add('message', $app['translator']->trans('The new article was added.'));
                 } else {
+                    $oldData = $app['db']->fetchAssoc("SELECT * FROM article WHERE id = ?", array($data['id']));
+
+                    if ($oldData['page_id'] != $data['page_id']) {
+                        $maxSort = $app['db']->fetchAssoc("SELECT MAX(sort) AS sort FROM article WHERE page_id = ?", array($data['page_id']));
+                        $app['db']->executeUpdate("UPDATE article SET sort = ?, updated_at = ? WHERE id = ?", array(
+                            $maxSort['sort']+1,
+                            date('Y-m-d H:i:s'),
+                            $data['id'],
+                        ));
+                    }
+
                     $app['db']->executeUpdate("UPDATE article SET page_id = ?, name = ?, slug = ?, content = ?, updated_at = ? WHERE id = ?", array(
                         $data['page_id'],
                         $data['name'],
@@ -87,6 +98,10 @@ class AdminControllerProvider implements ControllerProviderInterface
                         date('Y-m-d H:i:s'),
                         $data['id'],
                     ));
+
+                    if ($oldData['page_id'] != $data['page_id']) {
+                        $app['db']->executeUpdate("UPDATE article SET sort=sort-1 WHERE sort > ? AND page_id = ?", array($oldData['sort'], $oldData['page_id']));
+                    }
 
                     $app['session']->getFlashBag()->add('message', $app['translator']->trans('Changes were saved.'));
                 }
@@ -102,8 +117,8 @@ class AdminControllerProvider implements ControllerProviderInterface
         ->assert('id', '\d+');
 
         $controllers->get('/delete/{id}', function ($id) use ($app) {
-            $article = $app['db']->fetchAssoc("SELECT sort FROM article WHERE id = ?", array($id));
-            $app['db']->executeUpdate("UPDATE article SET sort=sort-1 WHERE sort > ?", array($article['sort']));
+            $article = $app['db']->fetchAssoc("SELECT page_id, sort FROM article WHERE id = ?", array($id));
+            $app['db']->executeUpdate("UPDATE article SET sort=sort-1 WHERE sort > ? AND page_id = ?", array($article['sort'], $article['page_id']));
 
             $app['db']->delete('article', array('id' => $id));
 
@@ -116,8 +131,8 @@ class AdminControllerProvider implements ControllerProviderInterface
         $controllers->match('/move/{id}/{type}', function ($id, $type) use ($app) {
             $action = $type == 'down' ? -1 : 1;
 
-            $article = $app['db']->fetchAssoc("SELECT sort FROM article WHERE id = ?", array($id));
-            $app['db']->executeUpdate("UPDATE article SET sort=sort+? WHERE sort = ?", array(-$action, $article['sort']+$action));
+            $article = $app['db']->fetchAssoc("SELECT page_id, sort FROM article WHERE id = ?", array($id));
+            $app['db']->executeUpdate("UPDATE article SET sort=sort+? WHERE sort = ? AND page_id = ?", array(-$action, $article['sort']+$action, $article['page_id']));
             $app['db']->executeUpdate("UPDATE article SET sort=sort+? WHERE id = ?", array($action, $id));
 
             $app['session']->getFlashBag()->add('message', $app['translator']->trans('Order of articles was changed'));

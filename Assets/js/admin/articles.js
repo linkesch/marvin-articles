@@ -7,11 +7,28 @@ var marvin_articles = function () {
 
             marvin_articles.events();
             marvin_articles.editor();
+            marvin_articles.hideMoveButtons();
         },
 
         events: function () {
             $(document).on('input', '#article-name, #article-content', marvin_articles.editorInput);
-            $(document).on('click', '#articles .move-up, #articles .move-down', marvin_pages.move);
+            $(document).on('click', '#articles .move-up, #articles .move-down', marvin_articles.move);
+        },
+
+        move: function (e) {
+            marvin_pages.move(e);
+            marvin_articles.hideMoveButtons();
+        },
+
+        hideMoveButtons: function () {
+            $('#articles tbody tr').each(function () {
+                if ($('td:nth-child(2)', this).text() != $(this).prev().find('td:nth-child(2)').text()) {
+                    $('.move-up', this).addClass('hidden');
+                }
+                if ($('td:nth-child(2)', this).text() != $(this).next().find('td:nth-child(2)').text()) {
+                    $('.move-down', this).addClass('hidden');
+                }
+            });
         },
 
         editor: function () {
