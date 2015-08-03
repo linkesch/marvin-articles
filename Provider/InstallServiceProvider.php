@@ -20,7 +20,7 @@ class InstallServiceProvider implements ServiceProviderInterface
                 $sm = $app['db']->getSchemaManager();
                 $schema = new Schema();
 
-                if ($sm->tablesExist(array('article')) == false) {
+                if ($sm->tablesExist(array('article')) === false) {
                     // Create table article
                     $articleTable = $schema->createTable('article');
                     $articleTable->addColumn('id', 'integer', array("autoincrement" => true));
