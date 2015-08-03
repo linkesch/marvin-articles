@@ -12,12 +12,17 @@
         }
     ],
     "require": {
-        "marvin/marvin": "~0.1",
-        "marvin/pages": ">=0.1.1,<2.0"
+        "marvin/marvin": "0.1.*@dev"
     },
     "autoload": {
         "psr-4": {
             "Marvin\\Articles\\": ""
         }
-    }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.1.x-dev"
+        }
+    },
+    "minimum-stability": "dev"
 }
